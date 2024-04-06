@@ -50,10 +50,19 @@ const HomeScreen = () => {
           <View
             style={
               id === data.item.id
-                ? { ...styles.msg, ...styles.msgRight }
-                : { ...styles.msg, ...styles.msgLeft }
+                ? { ...styles.msgBox, ...styles.msgRight }
+                : { ...styles.msgBox, ...styles.msgLeft }
             }
           >
+            <Text
+              style={
+                id === data.item.id
+                  ? { ...styles.author, textAlign: "left" }
+                  : { ...styles.author, textAlign: "right" }
+              }
+            >
+              {data.item.author}
+            </Text>
             <Text style={styles.msgText}>{data.item.msg}</Text>
           </View>
         )}
@@ -96,6 +105,14 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
 
+  author: {
+    color: "white",
+    fontSize: 13,
+    borderBottomWidth: 1,
+    borderBottomColor: "#222831",
+    paddingBottom: 4,
+  },
+
   msgText: {
     color: "white",
   },
@@ -136,6 +153,14 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 100,
     backgroundColor: "white",
+  },
+
+  msgBox: {
+    padding: 10,
+    marginHorizontal: 8,
+    backgroundColor: "#31363F",
+    borderRadius: 10,
+    marginBottom: 8,
   },
 });
 
