@@ -1,15 +1,20 @@
-import { StyleSheet, TextInput, View } from "react-native";
+import { StyleSheet, TextInput, View, ToastAndroid } from "react-native";
 import useStore from "../store/zustand";
 import { Text } from "react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "../components/Button";
 
 const ConnectScreen = () => {
-  const { connectUser } = useStore((state) => state);
+  const { connectUser, socket } = useStore((state) => state);
   const [username, setUsername] = useState("");
   const [roomId, setRoomId] = useState("");
   const joinRoomHandler = () => {
-    connectUser();
+    if (username && roomId) {
+      socket.emit("join:room", { username, roomId });
+      connectUser(roomId, username, socket.id);
+    } else {
+      ToastAndroid.show("Please fill Username & Room Id", ToastAndroid.SHORT);
+    }
   };
   return (
     <View style={{ backgroundColor: "#222831", flex: 1, padding: 8, gap: 10 }}>

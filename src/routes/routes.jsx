@@ -2,15 +2,16 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { StyleSheet } from "react-native";
 import FirstScreen from "../screens/first.screen";
 import HomeScreen from "../screens/home.screen";
-import Button from "../components/Button";
-import { useEffect, useMemo, useState } from "react";
 import useStore from "../store/zustand";
 import ConnectScreen from "../screens/connect.screen";
+import Button from "../components/Button";
 
 const Stack = createStackNavigator();
 
 const Routes = () => {
-  const connected = useStore((state) => state.connected);
+  const { connected, disconnectUser, roomId, socket } = useStore(
+    (state) => state
+  );
   return (
     <Stack.Navigator
       screenOptions={{
@@ -24,7 +25,19 @@ const Routes = () => {
         headerLeftContainerStyle: {
           display: "none",
         },
-        title: "Back",
+        title: `Room Id - [ ${roomId} ]`,
+        headerRight: () =>
+          roomId && (
+            <Button
+              textStyle={{ color: "white", fontSize: 20, fontWeight: "600" }}
+              onClick={() => {
+                socket.emit("exit:room", "Hello");
+                disconnectUser();
+              }}
+            >
+              Exit
+            </Button>
+          ),
       }}
     >
       <Stack.Group>
@@ -36,7 +49,11 @@ const Routes = () => {
         {connected ? (
           <Stack.Screen name="Home" component={HomeScreen} />
         ) : (
-          <Stack.Screen name="Home" component={ConnectScreen} />
+          <Stack.Screen
+            name="Home"
+            component={ConnectScreen}
+            options={{ title: "Join Room" }}
+          />
         )}
       </Stack.Group>
     </Stack.Navigator>

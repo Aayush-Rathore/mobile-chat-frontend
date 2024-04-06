@@ -4,24 +4,43 @@ import {
   TextInput,
   View,
   KeyboardAvoidingView,
-  ScrollView,
   FlatList,
+  ToastAndroid,
 } from "react-native";
 import Button from "../components/Button";
 import Icon from "react-native-vector-icons/Ionicons";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import useStore from "../store/zustand";
 
 const HomeScreen = () => {
-  const [msg, setMsg] = useState([
-    { author: "aayush", msg: "Hello" },
-    { author: "buddy", msg: "Hello" },
-  ]);
-  const author = "aayush";
-  const [inputValue, setInputValue] = useState({});
+  const [msg, setMsg] = useState([]);
+  const [inputValue, setInputValue] = useState({ author: "", msg: "" });
+  const { socket, roomId, username, id } = useStore((state) => state);
 
   const handleSendMsg = () => {
-    setMsg([...msg, inputValue]);
+    socket.emit("send:message", { inputValue, roomId, id });
+    setInputValue({});
   };
+
+  const handleUserJoined = useCallback((data) => {
+    ToastAndroid.show(`${data.username} joined room`, ToastAndroid.SHORT);
+  });
+
+  const handleMessageReceived = useCallback(
+    (data) => {
+      setMsg((prev) => [...prev, data]);
+    },
+    [setMsg]
+  );
+
+  useEffect(() => {
+    socket.on("user:joined", handleUserJoined);
+    socket.on("message:received", handleMessageReceived);
+    return () => {
+      socket.off("message:received", handleMessageReceived);
+      socket.off("user:joined", handleUserJoined);
+    };
+  }, [handleUserJoined]);
 
   return (
     <KeyboardAvoidingView style={styles.container}>
@@ -30,7 +49,7 @@ const HomeScreen = () => {
         renderItem={(data) => (
           <View
             style={
-              author === data.item.author
+              id === data.item.id
                 ? { ...styles.msg, ...styles.msgRight }
                 : { ...styles.msg, ...styles.msgLeft }
             }
@@ -44,13 +63,16 @@ const HomeScreen = () => {
           placeholder="Message"
           placeholderTextColor="white"
           style={styles.messageInput}
+          value={inputValue.msg}
           onChangeText={(value) => {
-            setInputValue({ author: author, msg: value });
+            setInputValue({ author: username, msg: value });
           }}
         />
         <Button
           style={styles.sendBtn}
-          onClick={(value) => handleSendMsg(value)}
+          onClick={(value) => {
+            handleSendMsg(value);
+          }}
         >
           <Icon name={"send"} size={25} />
         </Button>
