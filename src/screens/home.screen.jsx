@@ -1,50 +1,52 @@
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  KeyboardAvoidingView,
+  ScrollView,
+  FlatList,
+} from "react-native";
 import Button from "../components/Button";
 import Icon from "react-native-vector-icons/Ionicons";
 import { useState } from "react";
 
 const HomeScreen = () => {
-  const msg = [
+  const [msg, setMsg] = useState([
     { author: "aayush", msg: "Hello" },
     { author: "buddy", msg: "Hello" },
-  ];
+  ]);
   const author = "aayush";
-  const [inputValue, setInputValue] = useState("");
-
-  const handleChanges = (value) => {
-    console.log(value.target.value);
-    // setInputValue({ author: author, msg: value });
-  };
+  const [inputValue, setInputValue] = useState({});
 
   const handleSendMsg = () => {
-    msg.push(inputValue);
-    console.log(msg);
+    setMsg([...msg, inputValue]);
   };
 
   return (
-    <View style={styles.container}>
-      <View>
-        {msg.map((data, index) => {
-          return (
-            <View
-              key={index}
-              style={
-                author === data.author
-                  ? { ...styles.msg, ...styles.msgLeft }
-                  : { ...styles.msg, ...styles.msgRight }
-              }
-            >
-              <Text style={styles.msgText}>{data.msg}</Text>
-            </View>
-          );
-        })}
-      </View>
+    <KeyboardAvoidingView style={styles.container}>
+      <FlatList
+        data={msg}
+        renderItem={(data) => (
+          <View
+            style={
+              author === data.item.author
+                ? { ...styles.msg, ...styles.msgRight }
+                : { ...styles.msg, ...styles.msgLeft }
+            }
+          >
+            <Text style={styles.msgText}>{data.item.msg}</Text>
+          </View>
+        )}
+      />
       <View style={styles.messageBox}>
         <TextInput
           placeholder="Message"
           placeholderTextColor="white"
           style={styles.messageInput}
-          onChange={handleChanges}
+          onChangeText={(value) => {
+            setInputValue({ author: author, msg: value });
+          }}
         />
         <Button
           style={styles.sendBtn}
@@ -53,22 +55,23 @@ const HomeScreen = () => {
           <Icon name={"send"} size={25} />
         </Button>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 8,
     backgroundColor: "#222831",
+    paddingTop: 8,
   },
 
   msg: {
     padding: 10,
+    marginHorizontal: 8,
     backgroundColor: "#31363F",
     borderRadius: 10,
-    marginBottom: 2,
+    marginBottom: 8,
   },
 
   msgText: {
@@ -86,18 +89,21 @@ const styles = StyleSheet.create({
   },
 
   messageBox: {
-    position: "absolute",
-    bottom: 10,
+    padding: 10,
+    paddingTop: 2,
+    paddingBottom: 10,
     alignSelf: "center",
     flexDirection: "row",
-    flex: 1,
     gap: 10,
+    zIndex: 1,
+    backgroundColor: "#31363F",
   },
 
   messageInput: {
+    height: 50,
     flex: 1,
     padding: 2,
-    borderColor: "#31363F",
+    borderColor: "#222831",
     borderWidth: 1,
     borderRadius: 5,
     paddingLeft: 5,
@@ -105,6 +111,7 @@ const styles = StyleSheet.create({
   },
 
   sendBtn: {
+    height: 50,
     borderRadius: 100,
     backgroundColor: "white",
   },

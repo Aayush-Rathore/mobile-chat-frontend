@@ -3,27 +3,28 @@ import { StyleSheet } from "react-native";
 import FirstScreen from "../screens/first.screen";
 import HomeScreen from "../screens/home.screen";
 import Button from "../components/Button";
+import { useEffect, useMemo, useState } from "react";
+import useStore from "../store/zustand";
+import ConnectScreen from "../screens/connect.screen";
 
 const Stack = createStackNavigator();
 
 const Routes = () => {
+  const connected = useStore((state) => state.connected);
   return (
     <Stack.Navigator
       screenOptions={{
-        headerTitle: "Back",
-        headerRight: () => {
-          return (
-            <Button
-              style={styles.headerRight}
-              onClick={({ navigation }) => navigation.navigate("Profile")}
-            >
-              {/* <Image
-                  source={require("./assets/doremon.png")}
-                  style={styles.profileImg}
-                /> */}
-            </Button>
-          );
+        headerStyle: {
+          backgroundColor: "#222831",
+          shadowColor: "black",
         },
+        headerTitleStyle: {
+          color: "#fff",
+        },
+        headerLeftContainerStyle: {
+          display: "none",
+        },
+        title: "Back",
       }}
     >
       <Stack.Group>
@@ -32,10 +33,11 @@ const Routes = () => {
           component={FirstScreen}
           options={{ headerShown: false }}
         />
-        <Stack.Screen name="Home" component={HomeScreen} />
-      </Stack.Group>
-      <Stack.Group screenOptions={{ presentation: "modal" }}>
-        <Stack.Screen name="Profile" component={HomeScreen} />
+        {connected ? (
+          <Stack.Screen name="Home" component={HomeScreen} />
+        ) : (
+          <Stack.Screen name="Home" component={ConnectScreen} />
+        )}
       </Stack.Group>
     </Stack.Navigator>
   );
