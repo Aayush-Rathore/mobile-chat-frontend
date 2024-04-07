@@ -12,10 +12,12 @@ import Icon from "react-native-vector-icons/Ionicons";
 import { useCallback, useEffect, useState } from "react";
 import useStore from "../store/zustand";
 
-const HomeScreen = () => {
+const HomeScreen = ({ navigation }) => {
   const [msg, setMsg] = useState([]);
   const [inputValue, setInputValue] = useState({ author: "", msg: "" });
-  const { socket, roomId, username, id } = useStore((state) => state);
+  const { socket, roomId, username, id, disconnectUser } = useStore(
+    (state) => state
+  );
 
   const handleSendMsg = () => {
     socket.emit("send:message", { inputValue, roomId, id });
@@ -33,14 +35,31 @@ const HomeScreen = () => {
     [setMsg]
   );
 
+  const handleUserExit = useCallback((data) => {
+    ToastAndroid.show(data, ToastAndroid.SHORT);
+  });
+
   useEffect(() => {
     socket.on("user:joined", handleUserJoined);
     socket.on("message:received", handleMessageReceived);
+    socket.on("user:left", handleUserExit);
     return () => {
       socket.off("message:received", handleMessageReceived);
       socket.off("user:joined", handleUserJoined);
+      socket.off("user:left", handleUserExit);
     };
   }, [handleUserJoined]);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", () => {
+      socket.emit("user:exited", {
+        msg: `${username} has left the room!`,
+        roomId: roomId,
+      });
+      disconnectUser();
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   return (
     <KeyboardAvoidingView style={styles.container}>

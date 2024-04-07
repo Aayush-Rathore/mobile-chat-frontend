@@ -9,7 +9,7 @@ import Button from "../components/Button";
 const Stack = createStackNavigator();
 
 const Routes = () => {
-  const { connected, disconnectUser, roomId, socket } = useStore(
+  const { connected, disconnectUser, roomId, socket, username } = useStore(
     (state) => state
   );
   return (
@@ -31,7 +31,10 @@ const Routes = () => {
             <Button
               textStyle={{ color: "white", fontSize: 20, fontWeight: "600" }}
               onClick={() => {
-                socket.emit("exit:room", "Hello");
+                socket.emit("user:exited", {
+                  msg: `${username} has left the room!`,
+                  roomId: roomId,
+                });
                 disconnectUser();
               }}
             >

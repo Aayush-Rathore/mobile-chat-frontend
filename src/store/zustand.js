@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { io } from "socket.io-client"
 
 const useStore = create((set) => ({
-    socket: io("http://192.168.43.215:8000"),
+    socket: io("http://192.168.211.211:8000"),
     connected: false,
     username: "",
     roomId: "",
